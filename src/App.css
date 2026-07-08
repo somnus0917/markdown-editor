@@ -1,8 +1,43 @@
 :root {
-  color: #d8dee9;
-  background: #0e1116;
+  --app-bg: #0e1116;
+  --toolbar-bg: #151922;
+  --pane-border: #252a35;
+  --editor-bg: #111318;
+  --preview-bg: #0f1218;
+  --text: #d8dee9;
+  --text-strong: #f6f8fc;
+  --text-muted: #7f899b;
+  --button-bg: #1a1f2a;
+  --button-bg-hover: #252c3a;
+  --button-bg-active: #30384a;
+  --button-border: #303746;
+  --button-border-hover: #4b5870;
+  --button-text: #e6edf7;
+  --error-bg: #2a1519;
+  --error-border: #633339;
+  --error-text: #ffd6dc;
+  --link: #8ab4ff;
+  --rule: #303746;
+  --quote-border: #53617a;
+  --quote-text: #b8c0cf;
+  --inline-code-bg: #171b24;
+  --inline-code-border: #313846;
+  --inline-code-text: #ffcb8b;
+  --code-block-bg: #151923;
+  --code-block-border: #2a303d;
+  --table-header-bg: #181d27;
+  --table-stripe-bg: #121720;
+
+  color: var(--text);
+  background: var(--app-bg);
+  color-scheme: dark;
   font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
     sans-serif;
   font-size: 16px;
   font-synthesis: none;
@@ -10,6 +45,38 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+:root[data-theme="light"] {
+  --app-bg: #eef2f7;
+  --toolbar-bg: #ffffff;
+  --pane-border: #d8e0eb;
+  --editor-bg: #fbfcff;
+  --preview-bg: #f7f9fc;
+  --text: #263244;
+  --text-strong: #101827;
+  --text-muted: #64748b;
+  --button-bg: #f8fafc;
+  --button-bg-hover: #eef3f8;
+  --button-bg-active: #e3eaf3;
+  --button-border: #cbd5e1;
+  --button-border-hover: #94a3b8;
+  --button-text: #1f2937;
+  --error-bg: #fff1f2;
+  --error-border: #fecdd3;
+  --error-text: #9f1239;
+  --link: #2563eb;
+  --rule: #d6dee9;
+  --quote-border: #94a3b8;
+  --quote-text: #475569;
+  --inline-code-bg: #f1f5f9;
+  --inline-code-border: #d9e2ed;
+  --inline-code-text: #9a3412;
+  --code-block-bg: #f8fafc;
+  --code-block-border: #d8e0eb;
+  --table-header-bg: #edf2f7;
+  --table-stripe-bg: #f8fafc;
+  color-scheme: light;
 }
 
 * {
@@ -29,10 +96,10 @@ body {
 }
 
 button {
-  border: 1px solid #303746;
+  border: 1px solid var(--button-border);
   border-radius: 7px;
-  background: #1a1f2a;
-  color: #e6edf7;
+  background: var(--button-bg);
+  color: var(--button-text);
   cursor: pointer;
   font: inherit;
   font-size: 13px;
@@ -45,12 +112,12 @@ button {
 }
 
 button:hover {
-  background: #252c3a;
-  border-color: #4b5870;
+  background: var(--button-bg-hover);
+  border-color: var(--button-border-hover);
 }
 
 button:active {
-  background: #30384a;
+  background: var(--button-bg-active);
 }
 
 .app-shell {
@@ -59,18 +126,18 @@ button:active {
   width: 100%;
   height: 100%;
   min-width: 0;
-  background: #0e1116;
+  background: var(--app-bg);
 }
 
 .toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 14px;
   min-height: 52px;
   padding: 9px 14px;
-  border-bottom: 1px solid #252a35;
-  background: #151922;
+  border-bottom: 1px solid var(--pane-border);
+  background: var(--toolbar-bg);
 }
 
 .toolbar-actions {
@@ -78,6 +145,10 @@ button:active {
   flex: 0 0 auto;
   align-items: center;
   gap: 8px;
+}
+
+.theme-toggle {
+  flex: 0 0 auto;
 }
 
 .file-status {
@@ -91,7 +162,7 @@ button:active {
 .file-name {
   max-width: 100%;
   overflow: hidden;
-  color: #f4f7fb;
+  color: var(--text-strong);
   font-size: 14px;
   font-weight: 650;
   text-overflow: ellipsis;
@@ -101,7 +172,7 @@ button:active {
 .file-path {
   max-width: 100%;
   overflow: hidden;
-  color: #7f899b;
+  color: var(--text-muted);
   font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -113,15 +184,16 @@ button:active {
   justify-content: space-between;
   gap: 14px;
   padding: 10px 14px;
-  border-bottom: 1px solid #633339;
-  background: #2a1519;
-  color: #ffd6dc;
+  border-bottom: 1px solid var(--error-border);
+  background: var(--error-bg);
+  color: var(--error-text);
   font-size: 13px;
 }
 
 .error-banner button {
-  border-color: #704047;
-  background: #3a1d23;
+  border-color: var(--error-border);
+  background: transparent;
+  color: var(--error-text);
 }
 
 .workspace {
@@ -138,8 +210,8 @@ button:active {
 }
 
 .editor-pane {
-  border-right: 1px solid #252a35;
-  background: #111318;
+  border-right: 1px solid var(--pane-border);
+  background: var(--editor-bg);
 }
 
 .editor-host {
@@ -148,7 +220,7 @@ button:active {
 
 .preview-pane {
   overflow: auto;
-  background: #0f1218;
+  background: var(--preview-bg);
 }
 
 .markdown-preview {
@@ -156,7 +228,7 @@ button:active {
   min-height: 100%;
   margin: 0 auto;
   padding: 26px 34px 64px;
-  color: #dce3ef;
+  color: var(--text);
   line-height: 1.75;
   overflow-wrap: break-word;
 }
@@ -171,19 +243,19 @@ button:active {
 .markdown-preview h4,
 .markdown-preview h5,
 .markdown-preview h6 {
-  color: #f6f8fc;
+  color: var(--text-strong);
   line-height: 1.2;
   margin: 1.35em 0 0.55em;
 }
 
 .markdown-preview h1 {
-  border-bottom: 1px solid #303746;
+  border-bottom: 1px solid var(--rule);
   font-size: 2rem;
   padding-bottom: 0.35em;
 }
 
 .markdown-preview h2 {
-  border-bottom: 1px solid #252b36;
+  border-bottom: 1px solid var(--pane-border);
   font-size: 1.45rem;
   padding-bottom: 0.25em;
 }
@@ -202,7 +274,7 @@ button:active {
 }
 
 .markdown-preview a {
-  color: #8ab4ff;
+  color: var(--link);
   text-decoration: none;
 }
 
@@ -211,46 +283,45 @@ button:active {
 }
 
 .markdown-preview strong {
-  color: #f3f6fb;
+  color: var(--text-strong);
 }
 
 .markdown-preview hr {
   height: 1px;
   margin: 28px 0;
   border: 0;
-  background: #303746;
+  background: var(--rule);
 }
 
 .markdown-preview blockquote {
-  border-left: 4px solid #53617a;
-  color: #b8c0cf;
+  border-left: 4px solid var(--quote-border);
+  color: var(--quote-text);
   padding: 2px 0 2px 16px;
 }
 
 .markdown-preview code {
-  border: 1px solid #313846;
+  border: 1px solid var(--inline-code-border);
   border-radius: 5px;
-  background: #171b24;
-  color: #ffcb8b;
-  font-family:
-    "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  background: var(--inline-code-bg);
+  color: var(--inline-code-text);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   font-size: 0.9em;
   padding: 0.13em 0.35em;
 }
 
 .markdown-preview pre {
   overflow: auto;
-  border: 1px solid #2a303d;
+  border: 1px solid var(--code-block-border);
   border-radius: 8px;
-  background: #151923;
+  background: var(--code-block-bg);
   padding: 16px;
 }
 
 .markdown-preview pre code {
+  display: block;
   border: 0;
   background: transparent;
-  color: #dce3ef;
-  display: block;
+  color: var(--text);
   padding: 0;
 }
 
@@ -262,19 +333,19 @@ button:active {
 
 .markdown-preview th,
 .markdown-preview td {
-  border: 1px solid #303746;
+  border: 1px solid var(--rule);
   padding: 8px 10px;
   vertical-align: top;
 }
 
 .markdown-preview th {
-  background: #181d27;
-  color: #f2f5fa;
+  background: var(--table-header-bg);
+  color: var(--text-strong);
   font-weight: 650;
 }
 
 .markdown-preview tr:nth-child(even) td {
-  background: #121720;
+  background: var(--table-stripe-bg);
 }
 
 .markdown-preview img {
@@ -283,7 +354,7 @@ button:active {
 }
 
 .markdown-preview .math {
-  color: #f6f8fc;
+  color: var(--text-strong);
 }
 
 .markdown-preview .math-block {
@@ -302,6 +373,10 @@ button:active {
     flex-wrap: wrap;
   }
 
+  .theme-toggle {
+    align-self: flex-start;
+  }
+
   .file-status {
     align-items: flex-start;
   }
@@ -318,7 +393,7 @@ button:active {
 
   .editor-pane {
     border-right: 0;
-    border-bottom: 1px solid #252a35;
+    border-bottom: 1px solid var(--pane-border);
   }
 
   .markdown-preview {

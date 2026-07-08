@@ -7,9 +7,10 @@ import { isExternalOrDataSource, resolveLocalPath } from "../utils/paths";
 type PreviewProps = {
   markdown: string;
   baseDir: string | null;
+  renderKey: string;
 };
 
-function Preview({ markdown, baseDir }: PreviewProps) {
+function Preview({ markdown, baseDir, renderKey }: PreviewProps) {
   const previewRef = useRef<HTMLDivElement | null>(null);
   const html = useMemo(() => renderMarkdown(markdown), [markdown]);
 
@@ -21,7 +22,7 @@ function Preview({ markdown, baseDir }: PreviewProps) {
 
     rewriteLocalImageSources(container, baseDir);
     void typesetMath(container);
-  }, [html, baseDir]);
+  }, [html, baseDir, renderKey]);
 
   return (
     <section className="preview-pane" aria-label="Markdown rendered preview">
@@ -34,7 +35,10 @@ function Preview({ markdown, baseDir }: PreviewProps) {
   );
 }
 
-function rewriteLocalImageSources(container: HTMLElement, baseDir: string | null) {
+function rewriteLocalImageSources(
+  container: HTMLElement,
+  baseDir: string | null,
+) {
   if (!baseDir || !isTauri()) {
     return;
   }

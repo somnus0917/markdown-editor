@@ -13,55 +13,64 @@ import {
   rectangularSelection,
 } from "@codemirror/view";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
-import { defaultHighlightStyle, syntaxHighlighting } from "@codemirror/language";
+import {
+  defaultHighlightStyle,
+  syntaxHighlighting,
+} from "@codemirror/language";
 import { useEffect, useMemo, useRef } from "react";
+import type { ThemeMode } from "../App";
 
 type EditorProps = {
   value: string;
+  theme: ThemeMode;
   onChange: (value: string) => void;
 };
 
-const editorTheme = EditorView.theme(
-  {
-    "&": {
-      height: "100%",
-      color: "#d8dee9",
-      backgroundColor: "#111318",
-      fontSize: "14px",
-    },
-    ".cm-scroller": {
-      fontFamily:
-        '"SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace',
-      lineHeight: "1.65",
-      overflow: "auto",
-    },
-    ".cm-content": {
-      padding: "22px 24px 48px",
-      caretColor: "#f3f6ff",
-    },
-    ".cm-gutters": {
-      backgroundColor: "#111318",
-      color: "#5d6472",
-      borderRight: "1px solid #242936",
-    },
-    ".cm-activeLine": {
-      backgroundColor: "#181c24",
-    },
-    ".cm-activeLineGutter": {
-      backgroundColor: "#181c24",
-      color: "#aab2c5",
-    },
-    ".cm-selectionBackground, &.cm-focused .cm-selectionBackground": {
-      backgroundColor: "#33415f",
-    },
-    "&.cm-focused": {
-      outline: "none",
-    },
-  },
-  { dark: true },
-);
+const editorTheme = (theme: ThemeMode) => {
+  const dark = theme === "dark";
 
-function Editor({ value, onChange }: EditorProps) {
+  return EditorView.theme(
+    {
+      "&": {
+        height: "100%",
+        color: dark ? "#d8dee9" : "#273142",
+        backgroundColor: dark ? "#111318" : "#fbfcff",
+        fontSize: "14px",
+      },
+      ".cm-scroller": {
+        fontFamily:
+          '"SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace',
+        lineHeight: "1.65",
+        overflow: "auto",
+      },
+      ".cm-content": {
+        padding: "22px 24px 48px",
+        caretColor: dark ? "#f3f6ff" : "#24324a",
+      },
+      ".cm-gutters": {
+        backgroundColor: dark ? "#111318" : "#f2f5fa",
+        color: dark ? "#5d6472" : "#8a95a8",
+        borderRight: `1px solid ${dark ? "#242936" : "#dbe2ee"}`,
+      },
+      ".cm-activeLine": {
+        backgroundColor: dark ? "#181c24" : "#f1f5fb",
+      },
+      ".cm-activeLineGutter": {
+        backgroundColor: dark ? "#181c24" : "#edf2f8",
+        color: dark ? "#aab2c5" : "#526078",
+      },
+      ".cm-selectionBackground, &.cm-focused .cm-selectionBackground": {
+        backgroundColor: dark ? "#33415f" : "#c8d9ff",
+      },
+      "&.cm-focused": {
+        outline: "none",
+      },
+    },
+    { dark },
+  );
+};
+
+function Editor({ value, theme, onChange }: EditorProps) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<EditorView | null>(null);
   const valueRef = useRef(value);
@@ -87,7 +96,7 @@ function Editor({ value, onChange }: EditorProps) {
       markdown(),
       autocompletion(),
       EditorView.lineWrapping,
-      editorTheme,
+      editorTheme(theme),
       keymap.of([
         indentWithTab,
         ...defaultKeymap,
@@ -104,7 +113,7 @@ function Editor({ value, onChange }: EditorProps) {
         onChangeRef.current(nextValue);
       }),
     ],
-    [],
+    [theme],
   );
 
   useEffect(() => {
