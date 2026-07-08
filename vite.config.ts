@@ -1,34 +1,41 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { createReadStream, cpSync, existsSync, mkdirSync, statSync } from "node:fs";
+import {
+  createReadStream,
+  cpSync,
+  existsSync,
+  mkdirSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import type { Connect } from "vite";
 
 const host = process.env.TAURI_DEV_HOST;
 const require = createRequire(import.meta.url);
-const mathJaxDir = path.dirname(require.resolve("mathjax/tex-chtml.js"));
+const mathJaxDir = path.dirname(require.resolve("mathjax/tex-svg-nofont.js"));
 const mathJaxFontDir = path.dirname(
   require.resolve("@mathjax/mathjax-newcm-font/package.json"),
 );
+const sreLabShim = "export {};\n";
 
 function mathJaxStaticAssets() {
   return {
     name: "mathjax-static-assets",
     configureServer(server) {
-      server.middlewares.use(
-        "/mathjax",
-        serveStaticDirectory(mathJaxDir),
-      );
+      server.middlewares.use("/mathjax", serveStaticDirectory(mathJaxDir));
       server.middlewares.use(
         "/mathjax-fonts/mathjax-newcm-font",
         serveStaticDirectory(mathJaxFontDir),
       );
     },
     writeBundle() {
-      cpSync(mathJaxDir, path.resolve("dist/mathjax"), {
+      const distMathJaxDir = path.resolve("dist/mathjax");
+      cpSync(mathJaxDir, distMathJaxDir, {
         recursive: true,
       });
+      writeSreLabShim(distMathJaxDir);
       cpSync(
         mathJaxFontDir,
         path.resolve("dist/mathjax-fonts/mathjax-newcm-font"),
@@ -52,6 +59,12 @@ function serveStaticDirectory(rootDir: string): Connect.HandleFunction {
       return;
     }
 
+    if (relativePath === "sre/sre-lab.js") {
+      response.setHeader("Content-Type", "text/javascript; charset=utf-8");
+      response.end(sreLabShim);
+      return;
+    }
+
     if (!existsSync(filePath)) {
       next();
       return;
@@ -67,6 +80,12 @@ function serveStaticDirectory(rootDir: string): Connect.HandleFunction {
     response.setHeader("Content-Type", contentTypeFor(filePath));
     createReadStream(filePath).pipe(response);
   };
+}
+
+function writeSreLabShim(rootDir: string): void {
+  const shimPath = path.resolve(rootDir, "sre/sre-lab.js");
+  mkdirSync(path.dirname(shimPath), { recursive: true });
+  writeFileSync(shimPath, sreLabShim);
 }
 
 function safeDecodeURIComponent(value: string): string {

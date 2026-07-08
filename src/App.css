@@ -362,6 +362,10 @@ button:active {
   overflow-x: auto;
 }
 
+.markdown-preview mjx-container[jax="SVG"] svg {
+  fill: currentColor;
+}
+
 @media (max-width: 760px) {
   .toolbar {
     align-items: stretch;
