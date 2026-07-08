@@ -1,5 +1,3 @@
-import mathJaxScriptUrl from "mathjax/tex-chtml.js?url";
-
 type MathJaxApi = {
   startup?: {
     promise?: Promise<void>;
@@ -16,6 +14,7 @@ type MathJaxWindow = Window & {
 
 let mathJaxReady: Promise<void> | null = null;
 const MATHJAX_SCRIPT_ID = "mathjax-component";
+const MATHJAX_SCRIPT_SRC = "/mathjax/tex-chtml.js";
 
 export async function typesetMath(element: HTMLElement): Promise<void> {
   try {
@@ -43,6 +42,12 @@ async function ensureMathJax(): Promise<void> {
 
   if (!mathJaxReady) {
     mathJaxWindow.MathJax = {
+      loader: {
+        paths: {
+          mathjax: "/mathjax",
+          fonts: "/mathjax-fonts",
+        },
+      },
       tex: {
         inlineMath: [["\\(", "\\)"]],
         displayMath: [["\\[", "\\]"]],
@@ -84,16 +89,20 @@ function loadMathJaxScript(): Promise<void> {
       }
 
       existingScript.addEventListener("load", () => resolve(), { once: true });
-      existingScript.addEventListener("error", () => reject(new Error("MathJax script failed to load")), {
-        once: true,
-      });
+      existingScript.addEventListener(
+        "error",
+        () => reject(new Error("MathJax script failed to load")),
+        {
+          once: true,
+        },
+      );
     });
   }
 
   return new Promise((resolve, reject) => {
     const script = document.createElement("script");
     script.id = MATHJAX_SCRIPT_ID;
-    script.src = mathJaxScriptUrl;
+    script.src = MATHJAX_SCRIPT_SRC;
     script.async = true;
     script.onload = () => resolve();
     script.onerror = () => reject(new Error("MathJax script failed to load"));
