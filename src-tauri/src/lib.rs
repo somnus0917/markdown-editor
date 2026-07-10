@@ -32,12 +32,16 @@ enum FileTreeEntryKind {
 
 #[tauri::command]
 fn read_text_file(path: String) -> Result<String, String> {
-    std::fs::read_to_string(&path).map_err(|error| format!("Unable to read {path}: {error}"))
+    let path = validate_path(&path)?;
+    std::fs::read_to_string(&path)
+        .map_err(|error| format!("Unable to read {}: {error}", path_to_string(&path)))
 }
 
 #[tauri::command]
 fn write_text_file(path: String, content: String) -> Result<(), String> {
-    std::fs::write(&path, content).map_err(|error| format!("Unable to write {path}: {error}"))
+    let path = validate_path(&path)?;
+    std::fs::write(&path, content)
+        .map_err(|error| format!("Unable to write {}: {error}", path_to_string(&path)))
 }
 
 #[tauri::command]
@@ -128,6 +132,27 @@ fn is_markdown_file(path: &Path) -> bool {
 
 fn path_to_string(path: &Path) -> String {
     path.to_string_lossy().to_string()
+}
+
+fn validate_path(path: &str) -> Result<PathBuf, String> {
+    let path = PathBuf::from(path);
+    if !path.is_absolute() {
+        return Err("Path must be absolute".to_string());
+    }
+
+    Ok(path)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::validate_path;
+
+    #[test]
+    fn validate_path_rejects_relative_paths() {
+        let result = validate_path("notes/example.md");
+
+        assert!(result.is_err());
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
