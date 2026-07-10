@@ -5,11 +5,14 @@ type ToolbarProps = {
   filePath: string | null;
   dirty: boolean;
   theme: ThemeMode;
+  fileTreeVisible: boolean;
   onNew: () => void;
   onOpen: () => void;
+  onOpenWorkspace: () => void;
   onSave: () => void;
   onSaveAs: () => void;
   onToggleTheme: () => void;
+  onToggleFileTree: () => void;
 };
 
 function Toolbar({
@@ -17,11 +20,14 @@ function Toolbar({
   filePath,
   dirty,
   theme,
+  fileTreeVisible,
   onNew,
   onOpen,
+  onOpenWorkspace,
   onSave,
   onSaveAs,
   onToggleTheme,
+  onToggleFileTree,
 }: ToolbarProps) {
   return (
     <header className="toolbar">
@@ -31,6 +37,16 @@ function Toolbar({
         </button>
         <button type="button" onClick={onOpen}>
           Open
+        </button>
+        <button type="button" onClick={onOpenWorkspace}>
+          Open Workspace
+        </button>
+        <button
+          type="button"
+          onClick={onToggleFileTree}
+          aria-pressed={fileTreeVisible}
+        >
+          {fileTreeVisible ? "Hide Tree" : "Show Tree"}
         </button>
         <button type="button" onClick={onSave}>
           Save

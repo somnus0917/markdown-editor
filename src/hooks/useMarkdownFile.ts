@@ -82,6 +82,18 @@ export function useMarkdownFile() {
     setError(null);
   }, []);
 
+  const openPath = useCallback(async (path: string) => {
+    try {
+      setError(null);
+      const fileContent = await invoke<string>("read_text_file", { path });
+      setContentState(fileContent);
+      setSavedContent(fileContent);
+      setCurrentPath(path);
+    } catch (caughtError) {
+      setError(`Open failed: ${formatError(caughtError)}`);
+    }
+  }, []);
+
   const openFile = useCallback(async () => {
     try {
       setError(null);
@@ -100,14 +112,11 @@ export function useMarkdownFile() {
         return;
       }
 
-      const fileContent = await invoke<string>("read_text_file", { path });
-      setContentState(fileContent);
-      setSavedContent(fileContent);
-      setCurrentPath(path);
+      await openPath(path);
     } catch (caughtError) {
       setError(`Open failed: ${formatError(caughtError)}`);
     }
-  }, []);
+  }, [openPath]);
 
   const saveToPath = useCallback(
     async (path: string) => {
@@ -161,6 +170,7 @@ export function useMarkdownFile() {
     setContent,
     clearError,
     newFile,
+    openPath,
     openFile,
     saveFile,
     saveFileAs,
