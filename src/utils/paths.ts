@@ -33,7 +33,9 @@ export function isExternalOrDataSource(src: string): boolean {
 }
 
 export function isAbsolutePath(path: string): boolean {
-  return path.startsWith("/") || path.startsWith("\\") || WINDOWS_DRIVE_RE.test(path);
+  return (
+    path.startsWith("/") || path.startsWith("\\") || WINDOWS_DRIVE_RE.test(path)
+  );
 }
 
 export function resolveLocalPath(baseDir: string, src: string): string {
@@ -42,10 +44,12 @@ export function resolveLocalPath(baseDir: string, src: string): string {
     return decodedSrc;
   }
 
-  const separator = baseDir.includes("\\") && !baseDir.includes("/") ? "\\" : "/";
+  const separator =
+    baseDir.includes("\\") && !baseDir.includes("/") ? "\\" : "/";
   const baseParts = baseDir.split(/[\\/]+/);
   const srcParts = decodedSrc.split(/[\\/]+/);
   const parts = [...baseParts];
+  const minParts = baseParts.length;
 
   for (const part of srcParts) {
     if (!part || part === ".") {
@@ -53,7 +57,7 @@ export function resolveLocalPath(baseDir: string, src: string): string {
     }
 
     if (part === "..") {
-      if (parts.length > 1) {
+      if (parts.length > minParts) {
         parts.pop();
       }
       continue;
