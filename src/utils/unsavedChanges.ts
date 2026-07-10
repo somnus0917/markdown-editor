@@ -16,11 +16,11 @@ export async function confirmUnsavedChanges(): Promise<UnsavedDecision> {
     },
   );
 
-  if (result === "Save") {
+  if (result === "Save" || result === "Yes") {
     return "save";
   }
 
-  if (result === "Don't Save") {
+  if (result === "Don't Save" || result === "No") {
     return "discard";
   }
 

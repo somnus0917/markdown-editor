@@ -29,6 +29,7 @@ const LAST_FILE_KEY = "markdown-editor-last-file";
 function App() {
   const editorRef = useRef<EditorHandle | null>(null);
   const allowCloseRef = useRef(false);
+  const closeInProgressRef = useRef(false);
   const dirtyRef = useRef(false);
   const [theme, setTheme] = useState<ThemeMode>(() => getInitialTheme());
   const [fileTreeVisible, setFileTreeVisible] = useState(() =>
@@ -137,7 +138,13 @@ function App() {
       action: () => Promise<boolean> | boolean | void,
     ): Promise<boolean> => {
       if (dirtyRef.current) {
-        const decision: UnsavedDecision = await confirmUnsavedChanges();
+        let decision: UnsavedDecision;
+        try {
+          decision = await confirmUnsavedChanges();
+        } catch (caughtError) {
+          console.error("Unsaved changes dialog failed", caughtError);
+          return false;
+        }
 
         if (decision === "cancel") {
           return false;
@@ -203,18 +210,28 @@ function App() {
 
     void appWindow
       .onCloseRequested(async (event) => {
-        if (allowCloseRef.current || !dirtyRef.current) {
+        if (allowCloseRef.current) {
           return;
         }
 
         event.preventDefault();
+        if (closeInProgressRef.current) {
+          return;
+        }
+
+        closeInProgressRef.current = true;
         const canClose = await runAfterUnsavedCheck(() => true);
         if (!canClose) {
+          closeInProgressRef.current = false;
           return;
         }
 
         allowCloseRef.current = true;
-        await appWindow.close();
+        try {
+          await appWindow.close();
+        } finally {
+          closeInProgressRef.current = false;
+        }
       })
       .then((unlistenClose) => {
         unlisten = unlistenClose;
