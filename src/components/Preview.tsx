@@ -25,6 +25,7 @@ function Preview({
   onMarkdownChange,
 }: PreviewProps) {
   const previewRef = useRef<HTMLDivElement | null>(null);
+  const renderVersionRef = useRef(0);
   const parsedDocument = useMemo(
     () => parseMarkdownDocument(markdown),
     [markdown],
@@ -36,13 +37,40 @@ function Preview({
 
   useEffect(() => {
     const container = previewRef.current;
+    const renderVersion = renderVersionRef.current + 1;
+    renderVersionRef.current = renderVersion;
+
     if (!container) {
       return;
     }
 
     rewriteLocalImageSources(container, baseDir);
-    void typesetMath(container);
-  }, [html, baseDir, renderKey]);
+
+    if (!containsMath(parsedDocument.body)) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      if (renderVersionRef.current !== renderVersion) {
+        return;
+      }
+
+      if (container.innerHTML !== html) {
+        return;
+      }
+
+      void typesetMath(container).catch((error) => {
+        if (renderVersionRef.current === renderVersion) {
+          console.error("MathJax render failed", error);
+        }
+      });
+    }, 150);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      renderVersionRef.current += 1;
+    };
+  }, [html, baseDir, renderKey, parsedDocument.body]);
 
   return (
     <section className="preview-pane" aria-label="Markdown rendered preview">
@@ -59,6 +87,10 @@ function Preview({
       />
     </section>
   );
+}
+
+function containsMath(markdown: string): boolean {
+  return /(^|[^\\])\$[^$\n]+?\$|(^|\n)\s*\$\$\s*(\n|$)/.test(markdown);
 }
 
 type FrontMatterSummaryProps = {
@@ -111,7 +143,8 @@ function FrontMatterSummary({
       <div className="frontmatter-heading">
         <span className="frontmatter-kicker">TOML</span>
         <span className="frontmatter-hint">
-          Edit metadata, then blur or press Enter.
+          Visual edits may reformat TOML; comments and original spacing may not
+          be preserved.
         </span>
       </div>
       <div className="frontmatter-grid">

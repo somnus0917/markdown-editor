@@ -83,7 +83,7 @@ function extractTomlFrontMatter(markdown: string) {
   return null;
 }
 
-function parseToml(toml: string): TomlRecord {
+export function parseToml(toml: string): TomlRecord {
   const root: TomlRecord = {};
   let currentTable = root;
 

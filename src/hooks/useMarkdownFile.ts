@@ -82,19 +82,35 @@ export function useMarkdownFile() {
     setError(null);
   }, []);
 
-  const openPath = useCallback(async (path: string) => {
+  const restoreFileState = useCallback(
+    (
+      nextContent: string,
+      nextPath: string | null,
+      nextSavedContent: string,
+    ) => {
+      setContentState(nextContent);
+      setSavedContent(nextSavedContent);
+      setCurrentPath(nextPath);
+      setError(null);
+    },
+    [],
+  );
+
+  const openPath = useCallback(async (path: string): Promise<boolean> => {
     try {
       setError(null);
       const fileContent = await invoke<string>("read_text_file", { path });
       setContentState(fileContent);
       setSavedContent(fileContent);
       setCurrentPath(path);
+      return true;
     } catch (caughtError) {
       setError(`Open failed: ${formatError(caughtError)}`);
+      return false;
     }
   }, []);
 
-  const openFile = useCallback(async () => {
+  const openFile = useCallback(async (): Promise<boolean> => {
     try {
       setError(null);
       const selected = await open({
@@ -104,31 +120,33 @@ export function useMarkdownFile() {
       });
 
       if (!selected) {
-        return;
+        return false;
       }
 
       const path = Array.isArray(selected) ? selected[0] : selected;
       if (!path) {
-        return;
+        return false;
       }
 
-      await openPath(path);
+      return await openPath(path);
     } catch (caughtError) {
       setError(`Open failed: ${formatError(caughtError)}`);
+      return false;
     }
   }, [openPath]);
 
   const saveToPath = useCallback(
-    async (path: string) => {
+    async (path: string): Promise<boolean> => {
       await invoke<void>("write_text_file", { path, content });
       setSavedContent(content);
       setCurrentPath(path);
       setError(null);
+      return true;
     },
     [content],
   );
 
-  const saveFileAs = useCallback(async () => {
+  const saveFileAs = useCallback(async (): Promise<boolean> => {
     try {
       setError(null);
       const selectedPath = await save({
@@ -137,26 +155,27 @@ export function useMarkdownFile() {
       });
 
       if (!selectedPath) {
-        return;
+        return false;
       }
 
-      await saveToPath(selectedPath);
+      return await saveToPath(selectedPath);
     } catch (caughtError) {
       setError(`Save as failed: ${formatError(caughtError)}`);
+      return false;
     }
   }, [currentPath, saveToPath]);
 
-  const saveFile = useCallback(async () => {
+  const saveFile = useCallback(async (): Promise<boolean> => {
     if (!currentPath) {
-      await saveFileAs();
-      return;
+      return await saveFileAs();
     }
 
     try {
       setError(null);
-      await saveToPath(currentPath);
+      return await saveToPath(currentPath);
     } catch (caughtError) {
       setError(`Save failed: ${formatError(caughtError)}`);
+      return false;
     }
   }, [currentPath, saveFileAs, saveToPath]);
 
@@ -168,8 +187,10 @@ export function useMarkdownFile() {
     fileName,
     baseDir,
     setContent,
+    savedContent,
     clearError,
     newFile,
+    restoreFileState,
     openPath,
     openFile,
     saveFile,

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { FileTreeEntry } from "../hooks/useWorkspaceTree";
 
 type FileTreeProps = {
@@ -6,11 +6,13 @@ type FileTreeProps = {
   workspaceName: string;
   entries: FileTreeEntry[];
   selectedPath: string | null;
+  expandedPaths: Set<string>;
   loading: boolean;
   error: string | null;
   onOpenWorkspace: () => void;
   onRefreshWorkspace: () => void;
   onOpenFile: (path: string) => void;
+  onToggleDirectory: (path: string) => void;
   onDismissError: () => void;
 };
 
@@ -19,50 +21,20 @@ function FileTree({
   workspaceName,
   entries,
   selectedPath,
+  expandedPaths,
   loading,
   error,
   onOpenWorkspace,
   onRefreshWorkspace,
   onOpenFile,
+  onToggleDirectory,
   onDismissError,
 }: FileTreeProps) {
-  const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
-
-  useEffect(() => {
-    setExpandedPaths(new Set());
-  }, [workspacePath]);
-
-  useEffect(() => {
-    if (!selectedPath || !workspacePath) {
-      return;
-    }
-
-    setExpandedPaths((currentPaths) => {
-      const nextPaths = new Set(currentPaths);
-      for (const entry of entries) {
-        expandSelectedAncestors(entry, selectedPath, nextPaths);
-      }
-      return nextPaths;
-    });
-  }, [entries, selectedPath, workspacePath]);
-
   const hasEntries = entries.length > 0;
   const treeLabel = useMemo(
     () => (workspacePath ? `Workspace files in ${workspaceName}` : "Workspace"),
     [workspaceName, workspacePath],
   );
-
-  const toggleDirectory = (path: string) => {
-    setExpandedPaths((currentPaths) => {
-      const nextPaths = new Set(currentPaths);
-      if (nextPaths.has(path)) {
-        nextPaths.delete(path);
-      } else {
-        nextPaths.add(path);
-      }
-      return nextPaths;
-    });
-  };
 
   return (
     <aside className="file-tree-pane" aria-label="Workspace file tree">
@@ -122,7 +94,7 @@ function FileTree({
                 depth={0}
                 selectedPath={selectedPath}
                 expandedPaths={expandedPaths}
-                onToggleDirectory={toggleDirectory}
+                onToggleDirectory={onToggleDirectory}
                 onOpenFile={onOpenFile}
               />
             ))}
@@ -212,25 +184,6 @@ function TreeEntry({
       </button>
     </li>
   );
-}
-
-function expandSelectedAncestors(
-  entry: FileTreeEntry,
-  selectedPath: string,
-  expandedPaths: Set<string>,
-): boolean {
-  if (entry.path === selectedPath) {
-    return true;
-  }
-
-  for (const child of entry.children) {
-    if (expandSelectedAncestors(child, selectedPath, expandedPaths)) {
-      expandedPaths.add(entry.path);
-      return true;
-    }
-  }
-
-  return false;
 }
 
 export default FileTree;
